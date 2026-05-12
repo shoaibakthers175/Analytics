@@ -1,25 +1,17 @@
 import "dotenv/config";
 
 import express from "express";
-
 import mongoose from "mongoose";
-
 import cors from "cors";
-
 import http from "http";
+import { Server } from "socket.io";
 
-import { Server }
-from "socket.io";
-
-import analyticsRoutes
-from "./routes/analyticsRoutes.js";
-import aiRoutes
-from "./routes/aiRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 
 const app = express();
 
-const server =
-  http.createServer(app);
+const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
@@ -31,46 +23,45 @@ app.use(cors());
 
 app.use(express.json());
 
-app.use(
-  "/api/ai",
-  aiRoutes
-);
 
+// ✅ ADD THIS ROOT ROUTE
+app.get("/", (req, res) => {
+  res.send("Backend Running 🚀");
+});
+
+
+// AI Routes
+app.use("/api/ai", aiRoutes);
+
+
+// Socket Middleware
 app.use((req, res, next) => {
-
   req.io = io;
-
   next();
-
 });
 
-mongoose.connect(
-  process.env.MONGO_URI
-)
-.then(() => {
-  console.log(
-    "MongoDB Connected"
-  );
-});
 
+// Analytics Routes
 app.use("/", analyticsRoutes);
 
-io.on(
-  "connection",
-  () => {
-    console.log(
-      "Socket Connected"
-    );
-  }
-);
 
-server.listen(
-  process.env.PORT,
-  () => {
+// MongoDB Connection
+mongoose.connect(process.env.MONGO_URI)
+.then(() => {
+  console.log("MongoDB Connected");
+})
+.catch((err) => {
+  console.log(err);
+});
 
-    console.log(
-      "Server Running"
-    );
 
-  }
-);
+// Socket Connection
+io.on("connection", () => {
+  console.log("Socket Connected");
+});
+
+
+// Server Start
+server.listen(process.env.PORT || 5000, () => {
+  console.log("Server Running");
+});
