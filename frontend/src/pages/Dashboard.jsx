@@ -21,7 +21,7 @@ import HistoryTable from "../components/HistoryTable";
 import AIInsights from "../components/AIInsights";
 
 const socket =
-  io("http://localhost:5000");
+  io("https://analytics-gu8l.onrender.com");
 
 function Dashboard() {
 
